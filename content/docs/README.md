@@ -15,11 +15,13 @@ The workshops are broken into presentations intermixed with hands-on labs that r
 
 ## Workshop Content
 
-- Chapter 1: Claiming your Particle Device
+- Lab 1: Claiming your Particle Device
   - Unbox a brand new Argon, claim it to your Particle account, and make it light up with Tinker.
-- Chapter 2: Particle Workbench, primitives, and BLE
-  - Read the Grove sensors included with the Grove Starter Kit for Particle Mesh, Use particle primities to expose sensor data to the cloud, trigger actions and fire events.
-- Chapter 3: On-Device Debugging and integrations
-  - Learn to perform on-device debugging in Particle Workbench, and explore integrations with 3rd party systems.
-
+- Lab 2: Particle Workbench & Primitives
+  - Read from and program the sensors included with your IoT Starter Kit, use particle primities to expose sensor data to the cloud, trigger actions and fire events.
+- Lab 3: Exploring BLE & Advanced Device OS Features
+  - Learn how to use BLE with Particle devices, as well as advanced Device OS features like threading, sleep mode, and more.
+- Lab 4: Exploring Particle SDKs & Integrations
+  - Explore Particle SDKs for building Web apps, and build an integration
+  to connect your Particle device to the ThingSpeak platform.
 ---

@@ -11,12 +11,19 @@ module.exports = {
     ],
     sidebar: [
       '/docs/',
-      ['/docs/ch1', 'Chapter 1: Getting your Particle Argon online'],
+      ['/docs/ch1', 'Lab 1: Getting your Particle Argon online'],
       [
         '/docs/ch2',
-        'Chapter 2: Working with Particle Workbench, primitives & BLE'
+        'Lab 2: Working with Particle Workbench & Primitives'
       ],
-      ['/docs/ch3', 'Chapter 3: On-Device Debugging and integrations'],
+      [
+        '/docs/ch3',
+        'Lab 3: Exploring BLE & Advanced Device OS Features'
+      ],
+      [
+        '/docs/ch4', 
+        'Lab 4: Exploring Particle SDKs & Integrations'
+      ],
       ['/docs/extra', 'Extra: Going Even Further!']
     ]
   },
