@@ -3,10 +3,10 @@
 | **Project Goal**            | Start programming your Argon, read sensor data, and leverage the device cloud.                         |
 | --------------------------- | --------------------------------------------------------------------------------------------------------- |
 | **What you’ll learn**       | How to interact with sensors, using Particle variables, cloud functions and publish/subscribe.                               |
-| **Tools you’ll need**       | Access to the internet for build.particle.io and console.particle.io. Plus the Particle CLI, Particle Workbench, a Particle Argon, and Grove Starter Kit for Particle Mesh |
+| **Tools you’ll need**       | Access to the internet for build.particle.io and console.particle.io. Plus the Particle CLI, Particle Workbench, a Particle Argon, and IoT Starter Kit |
 | **Time needed to complete** | 60 minutes                                                                                                |
 
-In this session, you'll explore the Particle ecosystem via an Argon-powered Grove Starter Kit for Particle Mesh with several sensors! If you get stuck at any point during this session, [click here for the completed, working source](https://go.particle.io/shared_apps/5d7bb4fe1abb3a0016bd4127). If you pull this sample code into Workbench, don't forget to install the relevant libraries using the instructions below!
+In this session, you'll explore the Particle ecosystem via an Argon-powered IoT Starter Kit with several sensors! If you get stuck at any point during this session, [click here for the completed, working source](https://go.particle.io/shared_apps/5d7bb4fe1abb3a0016bd4127). If you pull this sample code into Workbench, don't forget to install the relevant libraries using the instructions below!
 
 ## Create a new project in Particle Workbench
 
@@ -60,9 +60,9 @@ In this session, you'll explore the Particle ecosystem via an Argon-powered Grov
 
 You're now ready to program your Argon with Particle Workbench. Let's get the device plugged into your Grove kit and start working with sensors.
 
-## Unboxing the Grove Starter Kit
+## Unboxing the IoT Starter Kit
 
-The Grove Starter Kit for Particle Mesh comes with seven different components that work out-of-the-box with Particle Mesh devices, and a Grove Shield that allows you to plug in your Feather-compatible Mesh devices for quick prototyping. The shield houses eight Grove ports that support all types of Grove accessories. For more information about the kit, [click here](https://docs.particle.io/datasheets/accessories/mesh-accessories/#grove-starter-kit-for-particle-mesh).
+The IoT Starter Kit comes with seven different components that work out-of-the-box with Particle 3rd Generation devices, and a Grove Shield that allows you to plug in your Feather-compatible devices for quick prototyping. The shield houses eight Grove ports that support all types of Grove accessories. For more information about the kit, [click here](https://docs.particle.io/datasheets/accessories/mesh-accessories/#grove-starter-kit-for-particle-mesh).
 
 For this lab, you'll need the following items from the kit:
 
@@ -70,9 +70,10 @@ For this lab, you'll need the following items from the kit:
 - Chainable LED
 - Light Sensor
 
-1. Open the Grove Starter Kit and remove the three components listed above, as well as the bag of Grove connectors.
+1. Open the IoT Starter Kit and remove the three components listed above, as well as the bag of Grove connectors.
 
-![](./images/02/02-grovecomponents.png)
+TODO: Add image 
+[](./images/02/02-grovecomponents.png)
 
 2. Remove the Grove Shield and plug in your Argon. This should be the same device you claimed in the last lab.
 
@@ -369,188 +370,9 @@ In addition to viewing published messages from the console, you can subscribe to
 
 ![](./images/02/light-cli.gif)
 
-## Working with Bluetooth on Particle Devices
-
-For the last section of this lab, we'll explore using BLE to advertise data from your device. Specifically, we'll use BLE to advertise the uptime, WiFi signal strength and free memory on your device, which you'll then read from a browser using Web BLE and Chrome.
-
-### Using Bluetooth with Particle Gen3 Devices
-
-1. To use Bluetooth with a Gen3 device, you'll need to be running Device OS version 1.3.0 or greater. To set this in Workbench, open the command palette (SHIFT + CMD/CTRL + P), select the "Configure Project for Device" option and select version "deviceOS@1.3.0" or newer.
-
-2. Next, you'll want to install a new library to help with getting power and battery info from your device. Open the command palette, select the "Install Library" command and enter "DiagnosticsHelperRK" into the textbox. Hit enter and the library will be installed.
-
-3. At the top of your project, add an include for the DiagnosticsHelper library.
-
-```cpp
-#include "DiagnosticsHelperRK.h"
-```
-
-4. Now, let's turn on threading in the app, using the `SYSTEM_THREAD` command below. This opt-in change will allow your user firmware and system firmware to run on separate threads, which can speed things up when you're doing cloud publishes and local operations like Bluetooth.
-
-```
-SYSTEM_THREAD(ENABLED);
-```
-
-5. Next, add some global variables to handle timing for updating the device state values outside of the `setup` and `loop` functions.
-
-```cpp
-const unsigned long UPDATE_INTERVAL = 2000;
-unsigned long lastUpdate = 0;
-```
-
-6. Now, add a UUID for the service, and three characteristic objects to represent uptime, signal strength, and free memory. The service UUID is arbitrary and you should change it from the default below using a UUID generator like the one [here](https://www.uuidgenerator.net/). Keep track of the UUID you create here  because you'll need it in the next section as well. The Service UUIDs should remain unchanged.
-
-```cpp
-// Private battery and power service UUID
-const BleUuid serviceUuid("5c1b9a0d-b5be-4a40-8f7a-66b36d0a5176"); // CHANGE ME
-
-BleCharacteristic uptimeCharacteristic("uptime", BleCharacteristicProperty::NOTIFY, BleUuid("fdcf4a3f-3fed-4ed2-84e6-04bbb9ae04d4"), serviceUuid);
-BleCharacteristic signalStrengthCharacteristic("strength", BleCharacteristicProperty::NOTIFY, BleUuid("cc97c20c-5822-4800-ade5-1f661d2133ee"), serviceUuid);
-BleCharacteristic freeMemoryCharacteristic("freeMemory", BleCharacteristicProperty::NOTIFY, BleUuid("d2b26bf3-9792-42fc-9e8a-41f6107df04c"), serviceUuid);
-```
-
-7. Next, create a function to configure and set-up BLE advertising from your device. This snippet will add the three characteristics you defined above, as well as the service UUID you specified, and will advertise itself as a connectable device.
-
-```cpp
-void configureBLE()
-{
-  BLE.addCharacteristic(uptimeCharacteristic);
-  BLE.addCharacteristic(signalStrengthCharacteristic);
-  BLE.addCharacteristic(freeMemoryCharacteristic);
-
-  BleAdvertisingData advData;
-
-  // Advertise our private service only
-  advData.appendServiceUUID(serviceUuid);
-
-  // Continuously advertise when not connected
-  BLE.advertise(&advData);
-}
-```
-
-8. At the end of your `setup` function, call the function you just created.
-
-```cpp
-configureBLE();
-```
-
-### Refactoring out the blocking delay
-
-Next, let's modify the `loop` function. We'll start by refactoring our firmware to remove the `delay` in the loop. While the delay approach is common when getting started with creating embedded applications, it's a blocking operation. This means that any calls you make to the device during a delay may timeout before being received.
-
-One common way to write periodic code without using `delay` is to use the built-in `millis()` function and keep track of the elapsed time between the last time you performed an operation (like a temp check) and the wait time between operations.
-
-1. First, let's add some global variables to hold the last check time and an interval. Add the following to the top of your project, outside of the `setup` and `loop`.
-
-```cpp
-const unsigned long UPDATE_INTERVAL = 2000;
-unsigned long lastUpdate = 0;
-```
-
-2. Now, in the `loop`, add a local variable to hold the current time elapsed. The `millis()` function returns the number of milliseconds that have elapsed since your device began running the current program. 
-
-```cpp
-unsigned long currentMillis = millis();
-```
-
-3. Next, remove the `delay` at the end of your loop function. Then, wrap the rest of the code with an if statement to see if the `UPDATE_INTERVAL` time has elapsed.
-
-Make sure you also update the `lastUpdate` variable to the current `millis` time or this `if` statement will never evaluate to `true` after the first time it runs.
-
-```cpp
-if (currentMillis - lastUpdate >= UPDATE_INTERVAL)
-{
-  lastUpdate = millis();
-
-  /* rest of Loop code here */ 
-}
-```
-
-Your `loop` should now look like this:
-
-```cpp
-void loop()
-{
-  unsigned long currentMillis = millis();
-
-  if (currentMillis - lastUpdate >= UPDATE_INTERVAL)
-  {
-    lastUpdate = millis();
-
-    temp = (int)dht.getTempFarenheit();
-    humidity = (int)dht.getHumidity();
-
-    Serial.printlnf("Temp: %f", temp);
-    Serial.printlnf("Humidity: %f", humidity);
-
-    double lightAnalogVal = analogRead(A0);
-    currentLightLevel = map(lightAnalogVal, 0.0, 4095.0, 0.0, 100.0);
-
-    if (currentLightLevel > 50)
-    {
-      Particle.publish("light-meter/level", String(currentLightLevel), PRIVATE);
-    }
-  }
-}
-```
-
-4. Now, let's add our BLE logic to the `loop`, after the `currentLightLevel` if statement. In this code, we check to see if another device (a peripheral) is connected to our Argon. If so. we'll use the diagnostics library to get the device uptime, signal strength and free memory, and set those values to our characteristics, so the connected client can read them.
-
-```cpp
-if (BLE.connected())
-{
-  uint8_t uptime = (uint8_t)DiagnosticsHelper::getValue(DIAG_ID_SYSTEM_UPTIME);
-  uptimeCharacteristic.setValue(uptime);
-
-  uint8_t signalStrength = (uint8_t)(DiagnosticsHelper::getValue(DIAG_ID_NETWORK_SIGNAL_STRENGTH) >> 8);
-  signalStrengthCharacteristic.setValue(signalStrength);
-
-  int32_t usedRAM = DiagnosticsHelper::getValue(DIAG_ID_SYSTEM_USED_RAM);
-  int32_t totalRAM = DiagnosticsHelper::getValue(DIAG_ID_SYSTEM_TOTAL_RAM);
-  int32_t freeMem = (totalRAM - usedRAM);
-  freeMemoryCharacteristic.setValue(freeMem);
-}
-```
-
-5. And that's all you need on the Argon side. Flash the latest firmware to your device and move on to the next step!
-
-### Viewing Bluetooth data with Web BLE on Chrome
-
-There are a number of methods by which you can connect to your BLE-powered Argon. You could use a mobile app (like [Bluefruit](https://apps.apple.com/us/app/adafruit-bluefruit-le-connect/id830125974) from Adafruit), or another Particle 3rd Gen device. You can also use a browser that supports Web BLE, like Chrome, which will do in this section. At the time this lab ws created, Chrome is the only desktop browser that supports Web BLE, so you'll need to have that browser installed to 
-
-1. Clone the [demo web app](https://github.com/bsatrom/particle-web-ble) for this project to your machine using a terminal window
-
-```bash
-$ git clone https://github.com/bsatrom/particle-web-ble
-```
-
-2. Open the project in your editor of choice, and modify the following snippet in the `src/scripts/ble.js` file to match the Service UUID you specified in your Argon code above. This code scans for available devices that match a specific UUID, so if you changed it, you should only see your device when running the app.
-
-```js
-const device = await navigator.bluetooth.requestDevice({
-  filters: [{ services: ['5c1b9a0d-b5be-4a40-8f7a-66b36d0a5176'] }] // CHANGE ME
-});
-```
-
-3. In a terminal window, run `npm run serve` to build and run the web app locally. Once the build completes, open a new browser tab or window with the URL specified in the terminal window.
-
-![](./images/02/vue-serve.png)
-
-4. Click on the "Scan" Button. A pop-up will appear as Chrome scans for devices. Once your device appears, click on it and click the "Pair" button. 
-
-![](./images/02/ble-demo.gif)
-
-In the local app, the screen will update as the connection is made and data is retrieved from the device. As new data is reported to the app from the device, these values will change automatically!
-
-## Bonus: Working with Mesh Publish and Subscribe
-
-If you've gotten this far and still have some time on your hands, how about some extra credit? So far, everything you've created has been isolated to a single device, a Particle Argon. Particle 3rd generation devices come with built-in mesh-networking capabilities.
-
-If you have a Xenon on hand, why not try creating a mesh network with your Argon and adding the Xenon by [following this lab in the Particle docs](https://docs.particle.io/workshops/mesh-101-workshop/mesh-messaging/)? Then, use `Mesh.publish` and `subscribe` to add some interactivity between your two devices, like taking a heart-rate reading when the `SETUP` button on the Xenon is pressed, or lighting up the `D7` LED on the Xenon each time the barometer sensor takes a reading.
-
 ## Appendix: Grove sensor resources
 
-This section contains links and resources for the Grove sensors included in the Grove Starter Kit for Particle Mesh.
+This section contains links and resources for the Grove sensors included in the IoT Starter Kit.
 
 ### Button
 
