@@ -1,10 +1,72 @@
 # Lab 3: Exploring BLE and Advanced Device OS Features
 
-| **Project Goal**            | Use Particle Webhooks and Integrations to connect your app to IFTTT; Learn to perform on-device debugging in Particle Workbench.                                                                                        |
+| **Project Goal**            | Use BLE to broadcast device details to a web app; Use system events and sleep to respond to external inputs.                                                                                        |
 | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **What you’ll learn**       | Working with Particle Integrations, IFTTT, and on-devie debugging in Particle Workbench |
-| **Tools you’ll need**       | Particle Workbench, an [IFTTT.com](https://ifttt.com) account, a Particle Argon, and the Grove Starter Kit for Particle Mesh, a Particle Debugger.                                                                                                            |
+| **What you’ll learn**       | Working with Bluetooth on Particle Devices, using advanced Device OS features like threads, system events, and sleep modes. |
+| **Tools you’ll need**       | Particle Workbench, a Particle Argon, and the IoT Starter, The Particle CLI Kit.                                                                                                            |
 | **Time needed to complete** | 60 minutes  
+
+In this lab, you're going to start exploring some Particle power-user features, starting with the Particle CLI and BLE, before moving onto some advanced Device OS features like system events and sleep.
+
+## Exploring the Particle CLI and Device Cloud API
+
+### The Particle CLI
+
+1.  If you haven't already, [install the Particle CLI](https://docs.particle.io/guide/tools-and-features/cli/photon/). Open a terminal window and type the following command:
+
+```bash
+bash <( curl -sL https://particle.io/install-cli )
+```
+
+2.  Type `particle login` and enter your Particle account email and password when prompted.
+
+![](./images/04/particlelogin.gif)
+
+3.  Once you're logged in, type `particle list` to see your list of online devices.
+
+![](./images/04/particlelist.gif)
+
+4.  The device you've been using for this workshop has two variables and one function. Get the value of the `temp` variable with the command `particle get temp`.
+
+![](./images/04/temp.gif)
+
+5.  You can also call one of the two functions to light up the yellow or blue LED button. Type the command `particle call <your-device-name> toggleLed` in the terminal. Run the same command again to turn the light off.
+
+### The Particle Device Cloud API
+
+Behind the scenes, every interface that Particle provides to work with devices, from the Console, to mobile apps, SDKs, and the CLI, they all talk through a RESTful Device Cloud API. You can even call yourself, directly.
+
+_The next few steps assume you have cURL installed on your machine. If you don't have this command-line utility on your machine, you can download and install it [here](https://curl.haxx.se/download.html) or use a GUI-based tool like [Postman](https://www.getpostman.com/)._
+
+1.  First, you'll need to obtain an access token from the CLI. Type `particle token list` to view the tokens associated with your account. The first one listed is your `user` token, and can be used to access the Device Cloud API. If no tokens are listed, generate a new one with `particle token new`.
+
+2.  With your token and Device ID in hand, type the following cURL command into a terminal window, replacing the text below in `< >` with your information.
+
+```bash
+curl https://api.particle.io/v1/devices?access_token=<your token>
+```
+
+By default, the response will generate a wall of text in your terminal. If you have Python 2.6+ installed on your machine, you can pipe the output to the `json.tool` and get pretty-printed JSON.
+
+```bash
+curl https://api.particle.io/v1/devices\?access_token\=<your token>
+| python -m json.tool
+```
+
+![](./images/04/curllist.gif)
+
+3.  For this next command, you need the Device ID of the Photon attached to your badge. You can find that in the console or via the `particle list` CLI command.
+
+4.  Let's call the `toggleLed` function using the Device Cloud API. Type the following, again replacing the text below in `< >` with your information.
+
+```bash
+curl https://api.particle.io/v1/devices/<device id>/toggleB \
+     -d access_token=<your token>
+```
+
+![](./images/04/curlcall.gif)
+
+You've now explored a number of ways that you can interface with the Particle Device cloud and your connected devices! Now, let's go beyond the Particle ecosystem and explore some of the ways that you can integrate with other 3rd party services, and backhaul your data into other cloud services.
 
 ## Working with Bluetooth on Particle Devices
 
@@ -179,3 +241,120 @@ const device = await navigator.bluetooth.requestDevice({
 
 In the local app, the screen will update as the connection is made and data is retrieved from the device. As new data is reported to the app from the device, these values will change automatically!
 
+
+
+## Handling System Events
+
+Next up, let's look at how we can respond to system events sent by the Device OS in our application firmware. For this section, we'll add a system event handler to detect when the `MODE` button on the Argon is clicked, and respond by turning on the `D7` LED.
+
+1. Start by adding a handler function to your application. When called, we'll use the duration parameter to figure out if the button has just been pressed (hence, no duration) and when it is released. The end result is an LED that will turn on when the button is pressed, and off when it is released.
+
+```cpp
+void button_handler(system_event_t event, int duration, void*)
+{
+  if (!duration) {
+    digitalWrite(D7, HIGH);
+  }  else {
+    digitalWrite(D7, LOW);
+  }
+}
+```
+
+2. Next we need to register the handler in the `setup` function. Place the following at the end of your existing `setup` function.
+
+```cpp
+void setup()
+{
+  // Existing code here
+
+  pinMode(D7, OUTPUT);
+  System.on(button_status, button_handler);
+}
+```
+
+3. Now flash this firmware to your device and wait for it to come back online.
+
+4. Click the `MODE` button (the button on the left side of the device). Your D7 LED should flash briefly each time you do.
+
+![](./images/03/systemevent.gif)
+
+System events are as simple as that! For a list of other system events at your disposal, check out the [docs](https://docs.particle.io/reference/device-os/firmware/electron/#system-events-reference).
+
+## Using Sleep Modes to save power
+
+Finally, let's look at sleep modes, which is an easy-to-use way to conserve power in our applications by taking our devices offline, either for an interval, or until woken up by external stimuli. In this section, we'll extend our system event code to put our device to sleep when the `MODE` button is clicked. We'll start by putting the device to sleep for a few seconds, and then add a button to our project that will bring the Argon back to life when clicked.
+
+1. Let's add a global boolean we can use to determine whether to go to sleep or not. Add this to the top of your program, outside of the `setup` and `loop` functions.
+
+```cpp
+bool timeToSleep;
+```
+
+2. Now, modify the system event handler from the last section. You can keep the code that turns the LED on, and set the `timeToSleep` boolean to true. 
+
+```cpp
+void button_handler(system_event_t event, int duration, void*)
+{
+  if (!duration) {
+    digitalWrite(D7, HIGH);
+  }  else {
+    digitalWrite(D7, LOW);
+
+    timeToSleep = true;
+  }
+}
+```
+
+3. Finally, let's check our boolean in the `loop` and, if true, set our boolean to false and put the device to sleep. At the start of the `loop` function, add the code below. The `System.sleep` method is called with the `WKP` pin on every Argon as the external pin to wake on, as well as a time delay of twenty seconds, which instructs the device to wake up even if the pin isn't triggered.
+
+```cpp
+void loop()
+{
+  if (timeToSleep) 
+  {
+    timeToSleep = false;
+    System.sleep(WKP, RISING, 20);
+  }
+
+  // Existing loop code
+}
+```
+
+2. Now, flash this new firmware to your device. When your Argon comes back online, click the D7 button. When the RGB LED turns off, that means your device is sleeping. After 5 seconds, it will come back online and reconnect to the Particle Device Cloud.
+
+3. Now let's add an external button so you can explore waking a device up from sleep on a pin change. Grab the Grove Button from your IoT Starter Kit, and another Grove cable. 
+
+![](./images/03/grove-button.png)
+
+4. Plug one end of the cable into the button, and the other into the `D4` port on the Grove shield.
+
+![](./images/03/button_plugged_in.png)
+
+5. In your `setup` function, set the `pinMode` for the D4 pin to `INPUT`.
+
+```cpp
+pinMode(D4, INPUT_PULLUP);
+```
+
+5. Finally, modify the `System.sleep` call to wake your device up when the D4 pin state changes from LOW to HIGH, as in, when it is pressed.
+
+```cpp
+void loop()
+{
+  if (timeToSleep) 
+  {
+    timeToSleep = false;
+    System.sleep(D4, RISING);
+  }
+
+  // Existing loop code
+}
+```
+
+6. Flash the firmware, and when your device comes back online, click the `MODE` button to put the device to sleep. 
+
+7. Now, push the Grove button to wake your Argon back up.
+
+![](./images/03/buttonwakeup.gif)
+
+Great job! For more info on using the `sleep` API, [check out the docs](https://docs.particle.io/reference/device-os/firmware/electron/#sleep-sleep-).

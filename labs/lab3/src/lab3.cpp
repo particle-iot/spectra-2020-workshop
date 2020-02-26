@@ -9,7 +9,6 @@
 #include "Grove_ChainableLED.h"
 #include "JsonParserGeneratorRK.h"
 #include "DiagnosticsHelperRK.h"
-#include "Grove-Ultrasonic-Ranger.h"
 
 DHT dht(D2);
 ChainableLED leds(A4, A5, 1);
@@ -19,8 +18,7 @@ SYSTEM_THREAD(ENABLED);
 int lastRange = 0;
 unsigned char buffer[64];
 int count = 0;
-
-Ultrasonic ultrasonic(D4);
+bool timeToSleep;
 
 // Private battery and power service UUID
 const BleUuid serviceUuid("5c1b9a0d-b5be-4a40-8f7a-66b36d0a5176");
@@ -39,6 +37,17 @@ double currentLightLevel;
 
 const unsigned long UPDATE_INTERVAL = 2000;
 unsigned long lastUpdate = 0;
+
+void button_handler(system_event_t event, int duration, void*)
+{
+  if (!duration) {
+    digitalWrite(D7, HIGH);
+  }  else {
+    digitalWrite(D7, LOW);
+
+    timeToSleep = true;
+  }
+}
 
 void configureBLE()
 {
@@ -74,21 +83,23 @@ void setup()
   Particle.publishVitals(10);
 
   configureBLE();
+
+  pinMode(D7, OUTPUT);
+  pinMode(D4, INPUT_PULLUP);
+
+  System.on(button_status, button_handler);
 }
 
 void loop()
 {
-  unsigned long currentMillis = millis();
-
-  int range;
-
-  range = ultrasonic.MeasureInCentimeters();
-  if (range != lastRange)
+  if (timeToSleep) 
   {
-    lastRange = range;
-
-    Mesh.publish("distance", String(range));
+    timeToSleep = false;
+    // System.sleep(WKP, RISING, 20);
+    System.sleep(D4, RISING);
   }
+
+  unsigned long currentMillis = millis();
 
   if (currentMillis - lastUpdate >= UPDATE_INTERVAL)
   {

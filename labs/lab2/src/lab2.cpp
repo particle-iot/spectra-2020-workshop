@@ -9,6 +9,8 @@
 #include "Grove_ChainableLED.h"
 #include "DiagnosticsHelperRK.h"
 
+SYSTEM_THREAD(ENABLED);
+
 const unsigned long UPDATE_INTERVAL = 2000;
 unsigned long lastUpdate = 0;
 
@@ -26,6 +28,7 @@ int toggleLed(String args);
 
 int temp, humidity;
 double currentLightLevel;
+
 
 void configureBLE()
 {
