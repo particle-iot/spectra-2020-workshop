@@ -80,8 +80,6 @@ void setup()
 
   Particle.function("toggleLed", toggleLed);
 
-  Particle.publishVitals(10);
-
   configureBLE();
 
   pinMode(D7, OUTPUT);

@@ -12,6 +12,8 @@ Now that you've gotten a survey of all that the Particle ecosystem offers, why n
 
 4.  Create a Particle-powered cross-platform mobile app using [NativeScript and Vue.js](https://www.nativescript.org/vue).
 
+5. Explore additonal [MATLAB analysis and visualization](https://www.mathworks.com/help/thingspeak/visualize-data.html?s_tid=CRUX_lftnav) features with ThingSpeak.
+
 ## Particle Resources
 
 - [Docs and Guides](https://docs.particle.io/guide/getting-started/intro/photon/)

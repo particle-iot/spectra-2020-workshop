@@ -14,13 +14,6 @@ SYSTEM_THREAD(ENABLED);
 const unsigned long UPDATE_INTERVAL = 2000;
 unsigned long lastUpdate = 0;
 
-// Private battery and power service UUID
-const BleUuid serviceUuid("5c1b9a0d-b5be-4a40-8f7a-66b36d0a5176");
-
-BleCharacteristic batStateCharacteristic("batState", BleCharacteristicProperty::NOTIFY, BleUuid("fdcf4a3f-3fed-4ed2-84e6-04bbb9ae04d4"), serviceUuid);
-BleCharacteristic powerSourceCharacteristic("powerSource", BleCharacteristicProperty::NOTIFY, BleUuid("cc97c20c-5822-4800-ade5-1f661d2133ee"), serviceUuid);
-BleCharacteristic batLevelCharacteristic("batLevel", BleCharacteristicProperty::NOTIFY, BleUuid("d2b26bf3-9792-42fc-9e8a-41f6107df04c"), serviceUuid);
-
 DHT dht(D2);
 ChainableLED leds(A4, A5, 1);
 
@@ -28,22 +21,6 @@ int toggleLed(String args);
 
 int temp, humidity;
 double currentLightLevel;
-
-
-void configureBLE()
-{
-  BLE.addCharacteristic(batStateCharacteristic);
-  BLE.addCharacteristic(powerSourceCharacteristic);
-  BLE.addCharacteristic(batLevelCharacteristic);
-
-  BleAdvertisingData advData;
-
-  // Advertise our private service only
-  advData.appendServiceUUID(serviceUuid);
-
-  // Continuously advertise when not connected
-  BLE.advertise(&advData);
-}
 
 void setup()
 {
@@ -60,8 +37,6 @@ void setup()
   Particle.variable("humidity", humidity);
 
   Particle.function("toggleLed", toggleLed);
-
-  configureBLE();
 }
 
 void loop()
@@ -84,18 +59,6 @@ void loop()
     if (currentLightLevel > 50)
     {
       Particle.publish("light-meter/level", String(currentLightLevel), PRIVATE);
-    }
-
-    if (BLE.connected())
-    {
-      uint8_t powerSource = (uint8_t)DiagnosticsHelper::getValue(DIAG_ID_SYSTEM_POWER_SOURCE);
-      powerSourceCharacteristic.setValue(powerSource);
-
-      uint8_t batState = (uint8_t)DiagnosticsHelper::getValue(DIAG_ID_SYSTEM_BATTERY_STATE);
-      batStateCharacteristic.setValue(batState);
-
-      uint8_t batLevel = (uint8_t)(DiagnosticsHelper::getValue(DIAG_ID_SYSTEM_BATTERY_CHARGE) >> 8);
-      batLevelCharacteristic.setValue(batLevel);
     }
   }
 }
