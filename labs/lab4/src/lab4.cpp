@@ -1,8 +1,8 @@
 /*
- * Project lab4
- * Description: 
+ * Project: Spectra 2020 Workshop - Lab 4
+ * Description: Source for Lab 4 of the 2020 Spectra Workshop
  * Author: Brandon Satrom <brandon@particle.io>
- * Date: February 28, 2019
+ * Date: March 3rd, 2020
  */
 #include "Particle.h"
 #include "Grove_Temperature_And_Humidity_Sensor.h"
@@ -15,9 +15,6 @@ ChainableLED leds(A4, A5, 1);
 
 SYSTEM_THREAD(ENABLED);
 
-int lastRange = 0;
-unsigned char buffer[64];
-int count = 0;
 bool timeToSleep;
 
 // Private battery and power service UUID
@@ -30,6 +27,8 @@ BleCharacteristic freeMemoryCharacteristic("freeMemory", BleCharacteristicProper
 int toggleLed(String args);
 void createEventPayload(int temp, int humidity, double light);
 void readSensors();
+void button_handler(system_event_t event, int duration, void*);
+void configureBLE();
 
 int temp, humidity;
 double temp_dbl, humidity_dbl;
@@ -136,12 +135,6 @@ void loop()
       int32_t totalRAM = DiagnosticsHelper::getValue(DIAG_ID_SYSTEM_TOTAL_RAM);
       int32_t freeMem = (totalRAM - usedRAM);
       freeMemoryCharacteristic.setValue(freeMem);
-
-      Serial.printlnf("Uptime: %d", uptime);
-      Serial.print("Strength: ");
-      Serial.println(signalStrength);
-      Serial.print("free memory: ");
-      Serial.println(freeMem);
     }
   }
 }

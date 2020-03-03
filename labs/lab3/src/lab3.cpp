@@ -1,13 +1,12 @@
 /*
- * Project lab3
- * Description: 
+ * Project: Spectra 2020 Workshop - Lab 3
+ * Description: Source for Lab 3 of the 2020 Spectra Workshop
  * Author: Brandon Satrom <brandon@particle.io>
- * Date: July 22, 2019
+ * Date: March 3rd, 2020
  */
 #include "Particle.h"
 #include "Grove_Temperature_And_Humidity_Sensor.h"
 #include "Grove_ChainableLED.h"
-#include "JsonParserGeneratorRK.h"
 #include "DiagnosticsHelperRK.h"
 
 DHT dht(D2);
@@ -15,9 +14,6 @@ ChainableLED leds(A4, A5, 1);
 
 SYSTEM_THREAD(ENABLED);
 
-int lastRange = 0;
-unsigned char buffer[64];
-int count = 0;
 bool timeToSleep;
 
 // Private battery and power service UUID
@@ -28,8 +24,8 @@ BleCharacteristic signalStrengthCharacteristic("strength", BleCharacteristicProp
 BleCharacteristic freeMemoryCharacteristic("freeMemory", BleCharacteristicProperty::NOTIFY, BleUuid("d2b26bf3-9792-42fc-9e8a-41f6107df04c"), serviceUuid);
 
 int toggleLed(String args);
-void createEventPayload(int temp, int humidity, double light);
-void readSensors();
+void button_handler(system_event_t event, int duration, void*);
+void configureBLE();
 
 int temp, humidity;
 double temp_dbl, humidity_dbl;
@@ -109,13 +105,11 @@ void loop()
     temp_dbl = temp;
     humidity_dbl = humidity;
 
-    Serial.printlnf("Temp: %f", temp);
-    Serial.printlnf("Humidity: %f", humidity);
+    Serial.printlnf("Temp: %f", temp_dbl);
+    Serial.printlnf("Humidity: %f", humidity_dbl);
 
     double lightAnalogVal = analogRead(A0);
     currentLightLevel = map(lightAnalogVal, 0.0, 4095.0, 0.0, 100.0);
-
-    createEventPayload(temp, humidity, currentLightLevel);
 
     if (currentLightLevel > 50)
     {
@@ -134,12 +128,6 @@ void loop()
       int32_t totalRAM = DiagnosticsHelper::getValue(DIAG_ID_SYSTEM_TOTAL_RAM);
       int32_t freeMem = (totalRAM - usedRAM);
       freeMemoryCharacteristic.setValue(freeMem);
-
-      Serial.printlnf("Uptime: %d", uptime);
-      Serial.print("Strength: ");
-      Serial.println(signalStrength);
-      Serial.print("free memory: ");
-      Serial.println(freeMem);
     }
   }
 }
@@ -162,20 +150,4 @@ void readSensors()
 
   double lightAnalogVal = analogRead(A0);
   currentLightLevel = map(lightAnalogVal, 0.0, 4095.0, 0.0, 100.0);
-
-  createEventPayload(temp, humidity, currentLightLevel);
-}
-
-void createEventPayload(int temp, int humidity, double light)
-{
-  JsonWriterStatic<256> jw;
-  {
-    JsonWriterAutoObject obj(&jw);
-
-    jw.insertKeyValue("temp", temp);
-    jw.insertKeyValue("humidity", humidity);
-    jw.insertKeyValue("light", light);
-  }
-
-  Particle.publish("env-vals", jw.getBuffer(), PRIVATE);
 }

@@ -6,7 +6,7 @@
 | **Tools you’ll need**       | Access to the internet for build.particle.io and console.particle.io. Plus the Particle CLI, Particle Workbench, a Particle Argon, and IoT Starter Kit |
 | **Time needed to complete** | 60 minutes                                                                                                |
 
-In this session, you'll explore the Particle ecosystem via an Argon-powered IoT Starter Kit with several sensors! If you get stuck at any point during this session, [click here for the completed, working source](https://go.particle.io/shared_apps/5d7bb4fe1abb3a0016bd4127). If you pull this sample code into Workbench, don't forget to install the relevant libraries using the instructions below!
+In this session, you'll explore the Particle ecosystem via an Argon-powered IoT Starter Kit with several sensors! If you get stuck at any point during this session, [click here for the completed, working source](https://go.particle.io/shared_apps/5e5eb80881620d0007ad4dc6). If you pull this sample code into Workbench, don't forget to install the relevant libraries using the instructions below!
 
 ## Create a new project in Particle Workbench
 
@@ -276,8 +276,6 @@ int toggleLed(String args) {
   delay(500);
 
   leds.setColorHSB(0, 0.0, 0.0, 0.0);
-
-  delay(500);
 
   return 1;
 }

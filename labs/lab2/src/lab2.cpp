@@ -1,18 +1,12 @@
 /*
- * Project lab2
- * Description: 
+ * Project: Spectra 2020 Workshop - Lab 2
+ * Description: Source for Lab 2 of the 2020 Spectra Workshop
  * Author: Brandon Satrom <brandon@particle.io>
- * Date: July 22, 2019
+ * Date: March 3rd, 2020
  */
 #include "Particle.h"
 #include "Grove_Temperature_And_Humidity_Sensor.h"
 #include "Grove_ChainableLED.h"
-#include "DiagnosticsHelperRK.h"
-
-SYSTEM_THREAD(ENABLED);
-
-const unsigned long UPDATE_INTERVAL = 2000;
-unsigned long lastUpdate = 0;
 
 DHT dht(D2);
 ChainableLED leds(A4, A5, 1);
@@ -20,6 +14,7 @@ ChainableLED leds(A4, A5, 1);
 int toggleLed(String args);
 
 int temp, humidity;
+double temp_dbl, humidity_dbl;
 double currentLightLevel;
 
 void setup()
@@ -33,34 +28,32 @@ void setup()
 
   pinMode(A0, INPUT);
 
-  Particle.variable("temp", temp);
-  Particle.variable("humidity", humidity);
+  Particle.variable("temp", temp_dbl);
+  Particle.variable("humidity", humidity_dbl);
 
   Particle.function("toggleLed", toggleLed);
 }
 
 void loop()
 {
-  unsigned long currentMillis = millis();
+  temp = dht.getTempFarenheit();
+  humidity = dht.getHumidity();
 
-  if (currentMillis - lastUpdate >= UPDATE_INTERVAL)
+  temp_dbl = temp;
+  humidity_dbl = humidity;
+
+  Serial.printlnf("Temp: %f", temp);
+  Serial.printlnf("Humidity: %f", humidity);
+
+  double lightAnalogVal = analogRead(A0);
+  currentLightLevel = map(lightAnalogVal, 0.0, 4095.0, 0.0, 100.0);
+
+  if (currentLightLevel > 50)
   {
-    lastUpdate = millis();
-
-    temp = (int)dht.getTempFarenheit();
-    humidity = (int)dht.getHumidity();
-
-    Serial.printlnf("Temp: %f", temp);
-    Serial.printlnf("Humidity: %f", humidity);
-
-    double lightAnalogVal = analogRead(A0);
-    currentLightLevel = map(lightAnalogVal, 0.0, 4095.0, 0.0, 100.0);
-
-    if (currentLightLevel > 50)
-    {
-      Particle.publish("light-meter/level", String(currentLightLevel), PRIVATE);
-    }
+    Particle.publish("light-meter/level", String(currentLightLevel), PRIVATE);
   }
+
+  delay(5000);
 }
 
 int toggleLed(String args)

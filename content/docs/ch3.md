@@ -6,7 +6,7 @@
 | **Tools you’ll need**       | Particle Workbench, a Particle Argon, and the IoT Starter, The Particle CLI Kit.                                                                                                            |
 | **Time needed to complete** | 60 minutes  
 
-In this lab, you're going to start exploring some Particle power-user features, starting with the Particle CLI and BLE, before moving onto some advanced Device OS features like system events and sleep.
+In this lab, you're going to start exploring some Particle power-user features, starting with the Particle CLI and BLE, before moving onto some advanced Device OS features like system events and sleep.  If you get stuck at any point during this session, [click here for the completed, working source](https://go.particle.io/shared_apps/5e5ebba381620d0007ad4e0e).
 
 ## Exploring the Particle CLI and Device Cloud API
 
@@ -90,14 +90,7 @@ For the last section of this lab, we'll explore using BLE to advertise data from
 SYSTEM_THREAD(ENABLED);
 ```
 
-5. Next, add some global variables to handle timing for updating the device state values outside of the `setup` and `loop` functions.
-
-```cpp
-const unsigned long UPDATE_INTERVAL = 2000;
-unsigned long lastUpdate = 0;
-```
-
-6. Now, add a UUID for the service, and three characteristic objects to represent uptime, signal strength, and free memory. The service UUID is arbitrary and you should change it from the default below using a UUID generator like the one [here](https://www.uuidgenerator.net/). Keep track of the UUID you create here  because you'll need it in the next section as well. The Service UUIDs should remain unchanged.
+5. Now, add a UUID for the service, and three characteristic objects to represent uptime, signal strength, and free memory. The service UUID is arbitrary and you should change it from the default below using a UUID generator like the one [here](https://www.uuidgenerator.net/). Keep track of the UUID you create here  because you'll need it in the next section as well. The Service UUIDs should remain unchanged.
 
 ```cpp
 // Private battery and power service UUID
@@ -108,7 +101,7 @@ BleCharacteristic signalStrengthCharacteristic("strength", BleCharacteristicProp
 BleCharacteristic freeMemoryCharacteristic("freeMemory", BleCharacteristicProperty::NOTIFY, BleUuid("d2b26bf3-9792-42fc-9e8a-41f6107df04c"), serviceUuid);
 ```
 
-7. Next, create a function to configure and set-up BLE advertising from your device. This snippet will add the three characteristics you defined above, as well as the service UUID you specified, and will advertise itself as a connectable device.
+6. Next, create a function to configure and set-up BLE advertising from your device. This snippet will add the three characteristics you defined above, as well as the service UUID you specified, and will advertise itself as a connectable device.
 
 ```cpp
 void configureBLE()
@@ -127,7 +120,7 @@ void configureBLE()
 }
 ```
 
-8. At the end of your `setup` function, call the function you just created.
+7. At the end of your `setup` function, call the function you just created.
 
 ```cpp
 configureBLE();
@@ -176,11 +169,14 @@ void loop()
   {
     lastUpdate = millis();
 
-    temp = (int)dht.getTempFarenheit();
-    humidity = (int)dht.getHumidity();
+    temp = dht.getTempFarenheit();
+    humidity = dht.getHumidity();
 
-    Serial.printlnf("Temp: %f", temp);
-    Serial.printlnf("Humidity: %f", humidity);
+    temp_dbl = temp;
+    humidity_dbl = humidity;
+
+    Serial.printlnf("Temp: %f", temp_dbl);
+    Serial.printlnf("Humidity: %f", humidity_dbl);
 
     double lightAnalogVal = analogRead(A0);
     currentLightLevel = map(lightAnalogVal, 0.0, 4095.0, 0.0, 100.0);

@@ -6,7 +6,7 @@
 | **Tools you’ll need**       | Particle Workbench, a [ThingSpeak](https://thingspeak.com/users/sign_up) account, a Particle Argon, and the IoT Starter Kit, a Particle Debugger.                                                                                                            |
 | **Time needed to complete** | 60 minutes                                                                                                                                                                |
 
-In this session, you're going to explore the power of Particle integrations with the popular ThingSpeak service, then build dashboards with ThingSpeak to visualize sensor data. If you get stuck at any point during this session, [click here for the completed, working source](https://go.particle.io/shared_apps/5d40aec2279e1e000b9ad57b).
+In this session, you're going to explore the power of Particle integrations with the popular ThingSpeak service, then build dashboards with ThingSpeak to visualize sensor data. If you get stuck at any point during this session, [click here for the completed, working source of the firmware changes you'll make in this lab](https://go.particle.io/shared_apps/5e5ebc3b81620d0022ad4e96).
 
 ## Introducing Particle Integrations and ThingSpeak
 
