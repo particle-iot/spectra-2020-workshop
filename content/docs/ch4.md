@@ -171,7 +171,7 @@ Finally, let's use ThingSpeak's built-in support for MATLAB to create a basic hi
 
 ```Matlab
 readChannelID = <your-channel-id>; 
-TemperatureFieldID = 41 
+TemperatureFieldID = 1; 
 HumidityFieldID = 2; 
 
 % CHANGE KEY BELOW %

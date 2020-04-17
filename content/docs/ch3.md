@@ -227,7 +227,7 @@ const device = await navigator.bluetooth.requestDevice({
 });
 ```
 
-3. In a terminal window, run `npm run serve` to build and run the web app locally. Once the build completes, open a new browser tab or window with the URL specified in the terminal window.
+3. In a terminal window, run `npm install` and then `npm run serve` to build and run the web app locally. Once the build completes, open a new browser tab or window with the URL specified in the terminal window.
 
 ![](./images/02/vue-serve.png)
 
