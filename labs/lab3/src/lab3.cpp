@@ -89,8 +89,17 @@ void loop()
   if (timeToSleep) 
   {
     timeToSleep = false;
-    // System.sleep(WKP, RISING, 20);
-    System.sleep(D4, RISING);
+
+    /* SystemSleepConfiguration config;
+    config.mode(SystemSleepMode::STOP)
+          .gpio(WKP, RISING)
+          .duration(20s);
+    SystemSleepResult result = System.sleep(config); */
+
+    SystemSleepConfiguration config;
+    config.mode(SystemSleepMode::STOP)
+          .gpio(D4, RISING);
+    SystemSleepResult result = System.sleep(config);
   }
 
   unsigned long currentMillis = millis();

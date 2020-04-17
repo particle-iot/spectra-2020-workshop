@@ -72,7 +72,7 @@ Now you're ready to set-up an integration.
 
 3. On the "New Channel" screen, add a name and desciption, and the values "temp", "humidity", and "light" in the first three fields. Set the Metadata field to "JSON" and click "Save Channel."
 
-![](./images/04/ts-channel.png)
+![](./images/04/ts-channel-config.png)
 
 4. After you save, your channel dashboard will load, showing three charts and no values. Let's get those populated with your sensor data!
 

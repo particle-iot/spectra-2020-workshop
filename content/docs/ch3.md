@@ -309,14 +309,18 @@ void loop()
   if (timeToSleep) 
   {
     timeToSleep = false;
-    System.sleep(WKP, RISING, 20);
+    SystemSleepConfiguration config;
+    config.mode(SystemSleepMode::STOP)
+          .gpio(WKP, RISING)
+          .duration(5s);
+    SystemSleepResult result = System.sleep(config);
   }
 
   // Existing loop code
 }
 ```
 
-2. Now, flash this new firmware to your device. When your Argon comes back online, click the D7 button. When the RGB LED turns off, that means your device is sleeping. After 5 seconds, it will come back online and reconnect to the Particle Device Cloud.
+2. Now, flash this new firmware to your device. When your Argon comes back online, click the `MODE` button. When the RGB LED turns off, that means your device is sleeping. After 5 seconds, it will come back online and reconnect to the Particle Device Cloud.
 
 3. Now let's add an external button so you can explore waking a device up from sleep on a pin change. Grab the Grove Button from your IoT Starter Kit, and another Grove cable. 
 
@@ -340,7 +344,11 @@ void loop()
   if (timeToSleep) 
   {
     timeToSleep = false;
-    System.sleep(D4, RISING);
+    
+    SystemSleepConfiguration config;
+    config.mode(SystemSleepMode::STOP)
+          .gpio(D4, RISING);
+    SystemSleepResult result = System.sleep(config);
   }
 
   // Existing loop code

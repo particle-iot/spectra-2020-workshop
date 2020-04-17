@@ -7,7 +7,7 @@
     <meta name="description" content="Workshops designed to teach the basics of IoT development with the Particle ecosystem &amp; the Particle Argon">
     
     
-    <link rel="preload" href="/assets/css/7.styles.c68e7648.css" as="style"><link rel="preload" href="/assets/js/app.16ddb441.js" as="script"><link rel="preload" href="/assets/js/2.939001ff.js" as="script"><link rel="prefetch" href="/assets/js/0.ecc4c3fc.js"><link rel="prefetch" href="/assets/js/1.eb3bdd10.js"><link rel="prefetch" href="/assets/js/3.df1ee398.js"><link rel="prefetch" href="/assets/js/4.c1204930.js"><link rel="prefetch" href="/assets/js/5.628743c5.js"><link rel="prefetch" href="/assets/js/6.446da1c4.js">
+    <link rel="preload" href="/assets/css/7.styles.c68e7648.css" as="style"><link rel="preload" href="/assets/js/app.46bdf77d.js" as="script"><link rel="preload" href="/assets/js/2.d58c3ad4.js" as="script"><link rel="prefetch" href="/assets/js/0.b8a0d595.js"><link rel="prefetch" href="/assets/js/1.407ac9fc.js"><link rel="prefetch" href="/assets/js/3.fa2cdf50.js"><link rel="prefetch" href="/assets/js/4.bb15e6d7.js"><link rel="prefetch" href="/assets/js/5.886b4d3b.js"><link rel="prefetch" href="/assets/js/6.def3e71f.js">
     <link rel="stylesheet" href="/assets/css/7.styles.c68e7648.css">
   </head>
   <body>
@@ -133,18 +133,26 @@ BleCharacteristic <span class="token function">freeMemoryCharacteristic</span><s
   <span class="token keyword">if</span> <span class="token punctuation">(</span>timeToSleep<span class="token punctuation">)</span> 
   <span class="token punctuation">{</span>
     timeToSleep <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
-    System<span class="token punctuation">.</span><span class="token function">sleep</span><span class="token punctuation">(</span>WKP<span class="token punctuation">,</span> RISING<span class="token punctuation">,</span> <span class="token number">20</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    SystemSleepConfiguration config<span class="token punctuation">;</span>
+    config<span class="token punctuation">.</span><span class="token function">mode</span><span class="token punctuation">(</span>SystemSleepMode<span class="token operator">::</span>STOP<span class="token punctuation">)</span>
+          <span class="token punctuation">.</span><span class="token function">gpio</span><span class="token punctuation">(</span>WKP<span class="token punctuation">,</span> RISING<span class="token punctuation">)</span>
+          <span class="token punctuation">.</span><span class="token function">duration</span><span class="token punctuation">(</span><span class="token number">5</span>s<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    SystemSleepResult result <span class="token operator">=</span> System<span class="token punctuation">.</span><span class="token function">sleep</span><span class="token punctuation">(</span>config<span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">}</span>
 
   <span class="token comment">// Existing loop code</span>
 <span class="token punctuation">}</span>
-</code></pre></div><ol start="2"><li><p>Now, flash this new firmware to your device. When your Argon comes back online, click the D7 button. When the RGB LED turns off, that means your device is sleeping. After 5 seconds, it will come back online and reconnect to the Particle Device Cloud.</p></li><li><p>Now let's add an external button so you can explore waking a device up from sleep on a pin change. Grab the Grove Button from your IoT Starter Kit, and another Grove cable.</p></li></ol><p><img src="/assets/img/grove-button.3dee4467.png" alt></p><ol start="4"><li>Plug one end of the cable into the button, and the other into the <code>D4</code> port on the Grove shield.</li></ol><p><img src="/assets/img/button_plugged_in.fcf89f75.png" alt></p><ol start="5"><li>In your <code>setup</code> function, set the <code>pinMode</code> for the D4 pin to <code>INPUT</code>.</li></ol><div class="language-cpp extra-class"><pre class="language-cpp"><code><span class="token function">pinMode</span><span class="token punctuation">(</span>D4<span class="token punctuation">,</span> INPUT_PULLUP<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre></div><ol start="2"><li><p>Now, flash this new firmware to your device. When your Argon comes back online, click the <code>MODE</code> button. When the RGB LED turns off, that means your device is sleeping. After 5 seconds, it will come back online and reconnect to the Particle Device Cloud.</p></li><li><p>Now let's add an external button so you can explore waking a device up from sleep on a pin change. Grab the Grove Button from your IoT Starter Kit, and another Grove cable.</p></li></ol><p><img src="/assets/img/grove-button.3dee4467.png" alt></p><ol start="4"><li>Plug one end of the cable into the button, and the other into the <code>D4</code> port on the Grove shield.</li></ol><p><img src="/assets/img/button_plugged_in.fcf89f75.png" alt></p><ol start="5"><li>In your <code>setup</code> function, set the <code>pinMode</code> for the D4 pin to <code>INPUT</code>.</li></ol><div class="language-cpp extra-class"><pre class="language-cpp"><code><span class="token function">pinMode</span><span class="token punctuation">(</span>D4<span class="token punctuation">,</span> INPUT_PULLUP<span class="token punctuation">)</span><span class="token punctuation">;</span>
 </code></pre></div><ol start="5"><li>Finally, modify the <code>System.sleep</code> call to wake your device up when the D4 pin state changes from LOW to HIGH, as in, when it is pressed.</li></ol><div class="language-cpp extra-class"><pre class="language-cpp"><code><span class="token keyword">void</span> <span class="token function">loop</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token punctuation">{</span>
   <span class="token keyword">if</span> <span class="token punctuation">(</span>timeToSleep<span class="token punctuation">)</span> 
   <span class="token punctuation">{</span>
     timeToSleep <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
-    System<span class="token punctuation">.</span><span class="token function">sleep</span><span class="token punctuation">(</span>D4<span class="token punctuation">,</span> RISING<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    
+    SystemSleepConfiguration config<span class="token punctuation">;</span>
+    config<span class="token punctuation">.</span><span class="token function">mode</span><span class="token punctuation">(</span>SystemSleepMode<span class="token operator">::</span>STOP<span class="token punctuation">)</span>
+          <span class="token punctuation">.</span><span class="token function">gpio</span><span class="token punctuation">(</span>D4<span class="token punctuation">,</span> RISING<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    SystemSleepResult result <span class="token operator">=</span> System<span class="token punctuation">.</span><span class="token function">sleep</span><span class="token punctuation">(</span>config<span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">}</span>
 
   <span class="token comment">// Existing loop code</span>
@@ -156,6 +164,6 @@ BleCharacteristic <span class="token function">freeMemoryCharacteristic</span><s
           Lab 4: Exploring Particle SDKs &amp; Integrations
         </a> →
       </span></p></div></div></div></div>
-    <script src="/assets/js/2.939001ff.js" defer></script><script src="/assets/js/app.16ddb441.js" defer></script>
+    <script src="/assets/js/2.d58c3ad4.js" defer></script><script src="/assets/js/app.46bdf77d.js" defer></script>
   </body>
 </html>
