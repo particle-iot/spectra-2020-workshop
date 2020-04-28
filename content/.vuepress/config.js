@@ -1,7 +1,7 @@
 module.exports = {
   base: '/',
   themeConfig: {
-    repo: 'particle-iot/spectra-workshop-2020',
+    repo: 'particle-iot/spectra-2020-workshop',
     docsDir: 'content',
     editLinks: true,
     editLinkText: 'Help us improve this page!',

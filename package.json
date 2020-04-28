@@ -9,12 +9,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:particle-iot/spectra-workshop-2020.git"
+    "url": "https://github.com/particle-iot/spectra-2020-workshop"
   },
   "author": "Brandon Satrom <brandon@particle.io>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/particle-iot/spectra-workshop-2020/issues"
+    "url": "https://github.com/particle-iot/spectra-2020-workshop/issues"
   },
-  "homepage": "https://github.com/particle-iot/spectra-workshop-2020#readme"
+  "homepage": "https://github.com/particle-iot/spectra-2020-workshop#readme"
 }
